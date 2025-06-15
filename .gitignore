@@ -1,0 +1,15 @@
+# Node.js
+client/node_modules/
+client/build/
+client/dist/
+
+# Python
+server/__pycache__/
+server/instance/
+server/*.pyc
+server/.env
+
+# General
+.env
+.DS_Store
+.vscode/
