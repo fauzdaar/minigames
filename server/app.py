@@ -1,10 +1,11 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit, join_room
-from models import db, bcrypt, User
 from config import Config
 from auth import auth_bp
 import jwt
+import json
+import os
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -12,9 +13,15 @@ app.config.from_object(Config)
 CORS(app, supports_credentials=True)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-db.init_app(app)
-bcrypt.init_app(app)
-app.register_blueprint(auth_bp)  # Mounted at root, so routes like /login, /register
+app.register_blueprint(auth_bp)
+
+USERS_FILE = "users.json"
+
+def load_users():
+    if not os.path.exists(USERS_FILE):
+        return []
+    with open(USERS_FILE, "r") as f:
+        return json.load(f)
 
 @app.route("/")
 def home():
@@ -22,8 +29,8 @@ def home():
 
 @app.route("/users")
 def get_users():
-    users = [user.username for user in User.query.all()]
-    return jsonify(users)
+    users = load_users()
+    return jsonify([user["username"] for user in users])
 
 @socketio.on("join")
 def on_join(data):
@@ -41,13 +48,18 @@ def handle_private_message(data):
         recipient = data["recipient"]
         text = data["text"]
         room = f"dm_{min(sender, recipient)}_{max(sender, recipient)}"
-        emit("private_message", {"sender": sender, "recipient": recipient, "text": text}, room=room)
+
+        # 👇 This line ensures the sender doesn't receive the message again
+        emit("private_message", {
+            "sender": sender,
+            "recipient": recipient,
+            "text": text
+        }, room=room, include_self=False)
+
     except jwt.ExpiredSignatureError:
         emit("error", {"error": "Token expired"})
     except jwt.InvalidTokenError:
         emit("error", {"error": "Invalid token"})
 
 if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
     socketio.run(app, debug=True, port=5000)
