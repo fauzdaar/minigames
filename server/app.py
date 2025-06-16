@@ -61,5 +61,4 @@ def handle_private_message(data):
     except jwt.InvalidTokenError:
         emit("error", {"error": "Invalid token"})
 
-if __name__ == "__main__":
-    socketio.run(app, debug=True, port=5000)
+pass
