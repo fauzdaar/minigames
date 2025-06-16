@@ -56,7 +56,7 @@ const TicTacToe = () => {
   };
 
   const aiMove = () => {
-    const difficulty = 0.5; // 80% chance to play optimally
+    const difficulty = 0.9; // 80% chance to play optimally
 
     let move;
     const availableMoves = board
