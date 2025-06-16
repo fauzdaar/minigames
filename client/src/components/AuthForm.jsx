@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FaUser, FaLock } from "react-icons/fa";
 
 const AuthForm = ({ type }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [err, setErr] = useState("");
   const navigate = useNavigate();
-
   const isLogin = type === "login";
 
   const handleSubmit = async (e) => {
@@ -14,7 +14,7 @@ const AuthForm = ({ type }) => {
     const endpoint = isLogin ? "/login" : "/register";
 
     try {
-      const res = await fetch(`http://localhost:5000${endpoint}`, {
+      const res = await fetch(`https://minigames-tjnz.onrender.com${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -40,33 +40,46 @@ const AuthForm = ({ type }) => {
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-center bg-gray-800 text-white">
-      <form onSubmit={handleSubmit} className="bg-gray-900 p-8 rounded-lg shadow-xl w-80">
-        <h2 className="text-2xl font-bold mb-4 text-center">
-          {isLogin ? "Login" : "Register"}
-        </h2>
-        {err && <div className="text-red-500 mb-2 text-sm">{err}</div>}
-        <input
-          type="text"
-          placeholder="Username"
-          className="w-full mb-3 p-2 bg-gray-700 rounded"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          className="w-full mb-4 p-2 bg-gray-700 rounded"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+    <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-gray-900 to-black px-4 text-white">
+      <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center">
+        {isLogin ? "Welcome Back 👋" : "Create Account 📝"}
+      </h2>
+
+      {err && <div className="text-red-400 mb-4 text-sm">{err}</div>}
+
+      <form
+        onSubmit={handleSubmit}
+        className="w-full max-w-md space-y-6"
+      >
+        <div className="flex items-center border border-gray-700 rounded-md p-3 bg-gray-800">
+          <FaUser className="text-gray-400 mr-3" />
+          <input
+            type="text"
+            placeholder="Username"
+            className="w-full bg-transparent outline-none text-white placeholder-gray-400"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
+        </div>
+
+        <div className="flex items-center border border-gray-700 rounded-md p-3 bg-gray-800">
+          <FaLock className="text-gray-400 mr-3" />
+          <input
+            type="password"
+            placeholder="Password"
+            className="w-full bg-transparent outline-none text-white placeholder-gray-400"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+
         <button
           type="submit"
-          className="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded"
+          className="w-full bg-blue-600 hover:bg-blue-700 transition-all duration-200 py-3 rounded-md font-semibold"
         >
-          {isLogin ? "Log In" : "Sign Up"}
+          {isLogin ? "Log In 🚀" : "Sign Up 🎉"}
         </button>
       </form>
     </div>
