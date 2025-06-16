@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
+import { ArrowLeft } from "lucide-react";
 
 const ChatPage = () => {
   const [users, setUsers] = useState([]);
@@ -8,6 +9,7 @@ const ChatPage = () => {
   const [text, setText] = useState("");
   const [username] = useState(localStorage.getItem("username"));
   const [token] = useState(localStorage.getItem("token"));
+  const [view, setView] = useState("users"); // "users" | "chat"
   const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
 
@@ -40,7 +42,6 @@ const ChatPage = () => {
         const data = await res.json();
         const filtered = data.filter((u) => u !== username);
         setUsers(filtered);
-        if (filtered.length > 0) setRecipient(filtered[0]);
       } catch (err) {
         console.error("Failed to load users:", err);
       }
@@ -67,17 +68,29 @@ const ChatPage = () => {
     setText("");
   };
 
+  const openChat = (user) => {
+    setRecipient(user);
+    setMessages([]);
+    setView("chat");
+  };
+
+  const backToUsers = () => {
+    setView("users");
+    setRecipient("");
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-6xl h-[80vh] bg-white/5 backdrop-blur-lg shadow-2xl border border-white/20 rounded-2xl flex overflow-hidden">
+
         {/* Left: Users List */}
-        <div className="w-1/3 border-r border-white/10 bg-gray-900/40 p-4 overflow-y-auto">
+        <div className={`w-full md:w-1/3 bg-gray-900/40 p-4 overflow-y-auto border-r border-white/10 ${view === "chat" ? "hidden md:block" : ""}`}>
           <h2 className="text-xl font-semibold mb-4">Users</h2>
           <ul className="space-y-2">
             {users.map((user) => (
               <li
                 key={user}
-                onClick={() => setRecipient(user)}
+                onClick={() => openChat(user)}
                 className={`cursor-pointer px-4 py-2 rounded-lg transition ${
                   user === recipient
                     ? "bg-purple-600 text-white"
@@ -91,11 +104,18 @@ const ChatPage = () => {
         </div>
 
         {/* Right: Chat Section */}
-        <div className="flex-1 flex flex-col">
+        <div className={`flex-1 flex flex-col w-full ${view === "users" ? "hidden md:flex" : "flex"}`}>
           {/* Header */}
-          <div className="p-4 bg-gradient-to-r from-purple-700/30 via-indigo-600/30 to-purple-800/30 border-b border-white/10">
+          <div className="p-4 bg-gradient-to-r from-purple-700/30 via-indigo-600/30 to-purple-800/30 border-b border-white/10 flex items-center">
+            {/* Back Arrow for Mobile */}
+            <button
+              onClick={backToUsers}
+              className="md:hidden mr-4 p-2 rounded-full hover:bg-white/10"
+            >
+              <ArrowLeft size={24} />
+            </button>
             <h2 className="text-lg font-semibold">
-              Chat with {recipient || "..."}, You are {username}
+              Chat with {recipient || "..."} &bull; You: {username}
             </h2>
           </div>
 
@@ -139,7 +159,7 @@ const ChatPage = () => {
         </div>
       </div>
 
-      {/* Custom Scrollbar Styling */}
+      {/* Custom Scrollbar */}
       <style>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 8px;
